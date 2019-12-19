@@ -1,0 +1,95 @@
+#include <iostream>
+#include <fstream>
+#include <vector>
+#include <string>
+#include "modflow.h"
+
+using namespace std;
+int main(int argc, char** argv)
+{
+  cout<<"This is program to prepare visualization data format to VISIT for models including:  "<<endl;
+  string model[]={"MODFLOW-2005", "PRMS","GSFLOW"};
+  for (int m=0; m<3; m++ )
+    {
+      cout<<"Number "<<(m+1)<<" : "<<model[m]<<endl;
+    }
+  cout<<"Please select the number of model you need to process. "<<endl;
+  int iModelNum, iItemNum;
+  ///================================
+  ///will be enabled in release version
+  ///  cin>>iModelNum;
+  ///================================
+  cout<<"You have selected Number "<<iModelNum<<endl;
+  std::string sExtension_envi = ".dat";
+  std::string sWorkspace_data = "/home/liao46/data/";
+  std::string sRegion_name = "huc819040507";
+  std::string sModel= "";
+  const char slash = '/';
+  int iFlag = 0;
+  modflow md;
+  iModelNum=1;
+  switch(iModelNum)
+    {
+    case 1:
+      {
+        cout<<"You have selected the MODFLOW model"<<endl;
+        sModel = "modflow";
+        std::string sWorkspace_data_modflow = sWorkspace_data + slash + sModel;
+        std::string sDem_file = sWorkspace_data_modflow + slash + "raster" + slash + "dem" + slash + sRegion_name  + slash +  sExtension_envi;
+        std::string sWorkspace_data_modflow_auxiliary = sWorkspace_data_modflow + slash + "auxiliary" ;
+        std::string sFilename_permafrost = sWorkspace_data_modflow + "/raster/permafrost/huc819040507/permazone/permazone2000" + sExtension_envi;
+        std::string item[]={"3D","Cell-to-cell flow","Outlet discharge","Soil moisture"};
+        for (int i = 0; i < 3; i++ )
+          {
+            cout<<"Number "<<(i+1)<<" : "<<item[i]<<endl;
+          }
+        cout<<"Please select the number of data item you want to visualize. "<<endl;
+        ///================================
+        ///will be enabled in release version
+        ///    cin>>iItemNum;
+        //=========================
+        iItemNum=0;
+        cout<<"You have selected Number "<<iItemNum<<endl;
+        switch(iItemNum)
+          {
+          case 0:
+            {
+              //view the modflow 3D mesh
+              std::string sWorkspace_out = sWorkspace_data_modflow + slash + "visualization";
+              std::string sFilename0 = sDem_file;
+              std::string sFilename1 = sWorkspace_data_modflow_auxiliary + slash + "setting/layer/layer_thickness_01" + sExtension_envi;
+              std::string sFilename2 = sWorkspace_data_modflow_auxiliary + slash + "setting/layer/layer_thickness_02" + sExtension_envi;
+              std::string sFilename3 = sWorkspace_data_modflow_auxiliary + slash + "setting/layer/layer_thickness_03" + sExtension_envi;
+              std::vector<string> vFilename;
+              cout<<sFilename0<<endl;
+              cout<<sFilename1<<endl;
+              cout<<sFilename2<<endl;
+              cout<<sFilename3<<endl;
+              vFilename.push_back(sFilename0);
+              vFilename.push_back(sFilename1);
+              vFilename.push_back(sFilename2);
+              vFilename.push_back(sFilename3);
+              iFlag = md.visualize_model_3d(vFilename, sFilename_permafrost, sWorkspace_out);
+            }
+            break;
+          case 1:
+            cout<<"Please input the cell to cell water flow filename: "<<endl;
+            //  cin>>sFilenameIn;
+            cout<<"Please input the output vtk filename: "<<endl;
+            //cin>>sFilenameOut;
+            //iFlag= md.visualize_block_data(sFilenameIn,sWorkspaceOut);
+            break;
+          case 2:
+            break;
+          default:
+            break;
+          }
+        break;
+      }
+    default:
+      cout<<"You haven't selected any model, press any key to exit...";
+      break;
+    }
+  printf("Congratuation!\n");
+  return 1;
+}

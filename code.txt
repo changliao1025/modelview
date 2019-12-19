@@ -1,0 +1,75 @@
+          float *x = new float[icol+1];
+          for (i=0;i<icol+1;i++)  x[i]=i;
+          float *y = new float[irow+1];
+          for (i=0;i<irow+1;i++)  y[i]=i;
+          float z[4] = {0.0, 400.0,490.0, 495.0 };
+          int ndims = 3;
+          /* Zonal and Nodal variable data. */
+          float stream[ilayer][irow][icol];
+          float streamVect[ilayer][irow][icol][3];
+          /* Info about the variables to pass to visit_writer. */
+          int nvars = 2;
+          int vardims[] = {1, 3};
+          int centering[] = {0, 0};
+          const char *varnames[] = {"stream", "streamVect"};
+          float *vars[] = {(float*)stream, (float*)streamVect};
+          float angle=0.0;
+          //read the stream data
+          for ( s = 0; s < istress; s++)
+            {
+              /* Create 2 zonal variables; 1 scalar, 1 vector. */
+              // Read the first 8 lines, which are header
+              for ( l = 0; l < 8;l++)  getline (fsFileIn,line);
+              for ( r = 0; r < ireach; r++)
+                {
+                  getline (fsFileIn,line);
+                  sscanf (line.c_str(),"%i %i %i %i %i %f %f %f %f %f %f %f %f %f %f %f %f %f",
+                          &sreachinfo[r].layer,&sreachinfo[r].row,&sreachinfo[r].col,
+                          &sreachinfo[r].segment, &sreachinfo[r].reachnum,
+                          &sreachinfo[r].flowin,&sreachinfo[r].streamloss,
+                          &sreachinfo[r].flowout,&sreachinfo[r].runoff,
+                          &sreachinfo[r].prec, &sreachinfo[r].et,
+                          &sreachinfo[r].head,&sreachinfo[r].depth,
+                          &sreachinfo[r].width,&sreachinfo[r].conductance,
+                          &sreachinfo[r].leakage, &sreachinfo[r].storagechange,
+                          &sreachinfo[r].gwhead);
+                  stream[sreachinfo[r].layer][irow-sreachinfo[r].row+1][sreachinfo[r].col-1]
+                    = sreachinfo[r].flowout;
+                  if( 1 == sreachinfo[r].reachnum )
+                    {
+                      streamVect[sreachinfo[r].layer][irow-sreachinfo[r].row+1][sreachinfo[r].col-1][0] = 0.0 ;
+                      streamVect[sreachinfo[r].layer][irow-sreachinfo[r].row+1][sreachinfo[r].col-1][1] = 0.0 ;
+                      streamVect[sreachinfo[r].layer][irow-sreachinfo[r].row+1][sreachinfo[r].col-1][2]
+                        = sreachinfo[r].flowout/86400.0;
+                    }
+                  else
+                    {
+                      angle =atan2(sreachinfo[r-1].row - sreachinfo[r].row ,  sreachinfo[r].col - sreachinfo[r-1].col  );
+                      streamVect[sreachinfo[r].layer][irow-sreachinfo[r].row+1][sreachinfo[r].col-1][0]
+                        =(float)cos(angle) * sreachinfo[r].flowout /86400.0 ;
+                      streamVect[sreachinfo[r].layer][irow-sreachinfo[r].row+1][sreachinfo[r].col-1][1]
+                        =(float)sin(angle) * sreachinfo[r].flowout /86400.0;
+                      streamVect[sreachinfo[r].layer][irow-sreachinfo[r].row+1][sreachinfo[r].col-1][2] = 0.0 ;
+                    }
+                }
+              stringstream ss;
+              ss << (s+1);
+              if(s >= 99)
+                {
+                  sFileNameOut = "flowout" +  ss.str() + ".vtk";
+                }
+              else
+                {
+                  if(s>=9)
+                    {
+                      sFileNameOut = "flowout0" +  ss.str() + ".vtk";
+                    }
+                  else
+                    {
+                      sFileNameOut = "flowout00" +  ss.str() + ".vtk";
+                    }
+                }
+              write_rectilinear_mesh(sFilenameOut.c_str(), 0, dims, x, y, z, nvars,
+                                     vardims, centering, varnames, vars);
+            }
+        }

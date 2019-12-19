@@ -1,0 +1,18 @@
+all: viewer
+
+data.o: data.cpp 
+	g++ -g -c data.cpp
+viewer: viewer.o modflow.o visit_writer.o data.o
+	g++ -g viewer.o modflow.o visit_writer.o data.o -o viewer -I ./
+
+viewer.o: viewer.cpp
+	g++ -g -c viewer.cpp -I ./
+
+modflow.o: modflow.cpp data.o
+	g++ -g -c modflow.cpp -I ./
+
+visit_writer.o: visit_writer.c
+	gcc -g -c visit_writer.c -I ./
+
+clean:
+	rm *o viewer

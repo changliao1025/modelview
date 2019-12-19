@@ -1,0 +1,73 @@
+#pragma once
+//C library
+#include <cstdlib>
+#include <cmath>
+//Silo library is currently unimplemented
+extern "C" {
+  //#include <silo.h>
+#include <visit_writer.h>
+}
+
+
+//C++ library
+#include <algorithm>
+#include <array>
+//#include <cstdio>
+#include <cctype>
+#include <string>
+#include <iostream>
+#include <iomanip>
+//#include <fstream>
+#include <sstream>
+#include "data.h"
+
+static const int ncolumn= 388;
+static const int nrow= 310;
+
+static const int nlayer=3;
+
+const char slash = '/';
+using namespace std;
+class modflow
+{
+ public:
+  modflow(void);
+  //modflow(int icol,int irow, int ilayer);
+  ~modflow(void);
+  static const int nreach=1980;
+  static const int nstress=184;
+  static const int nsteady=1;
+  static const int ntransient=nstress-nsteady;
+  struct reachinfo {
+    int layer;
+    int row;
+    int col;
+    int segment;
+    int reachnum;
+    float flowin;
+    float streamloss;
+    float flowout;
+    float runoff;
+    float prec;
+    float et;
+    float head;
+    float depth;
+    float width;
+    float conductance;
+    float leakage;
+    float storagechange;
+    float gwhead;
+  };
+
+
+  int visualize_model_3d(std::vector<string> vFilename , std::string sFilename_permafrost, std::string sWorkspace_out);
+  int visualize_sfr_data(string sFilenameIn,string sWorkspaceOut);
+  int visualize_block_data(string sFilenameIn, string sFilenameOut);
+  int verify_outlet_discharge(string sFilenameIn, string sObservation, string sFilenameOut);
+
+
+  double search_neighbor(int i, int j, std::vector< double> vDem);
+  double calculate_mean(std::array<4,double> aArray, double missing_value);
+
+};
+
