@@ -8,7 +8,7 @@ https://www.usgs.gov/software/modflow-6-usgs-modular-hydrologic-model
 
 It will supports unstructured mesh grid in the near future.
 
-This tool will only produce to VTK file, the users should use VisIt or ParaView to visualize the data.
+This tool will only produces VTK file, the users should use VisIt or ParaView to visualize the data.
 
 https://wci.llnl.gov/simulation/computer-codes/visit/
 
